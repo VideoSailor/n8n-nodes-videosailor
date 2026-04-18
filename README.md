@@ -30,6 +30,7 @@
 - [Operations](#-operations)
 - [Credentials](#-credentials)
 - [Compatibility](#-compatibility)
+- [Example Workflow](#-example-workflow)
 - [Resources](#-resources)
 - [Development](#-development)
 
@@ -77,6 +78,15 @@ This node requires API credentials for the VideoSailor API.
 ## 🧩 Compatibility
 
 ✅ Compatible with n8n@1.60.0 or later.
+
+## 🗂️ Example Workflow
+
+An example workflow is included at [`examples/download-and-transcribe.json`](examples/download-and-transcribe.json). It demonstrates:
+
+1. **Download** a YouTube video as binary data
+2. **Transcribe** the same video and return timestamped segments
+
+To use it: in n8n go to **Workflows → Import from file**, select the JSON, then add your VideoSailor credentials.
 
 ## 🔗 Resources
 
@@ -141,7 +151,15 @@ npm run format
 
 ### 🚢 Publishing
 
-```bash
-npm run build
-npm publish
-```
+Releases are automated via [release-please](https://github.com/googleapis/release-please). Commit to `main` using [Conventional Commits](https://www.conventionalcommits.org/) and release-please handles the rest:
+
+| Prefix | Effect | npm version bump |
+|--------|--------|-----------------|
+| `feat:` | New operation or capability | minor |
+| `fix:` | Bug fix | patch |
+| `perf:` | Performance improvement | patch |
+| `deps:` | Dependency update | patch |
+| `feat!:` or `BREAKING CHANGE:` footer | Breaking API change | major |
+| `chore:` / `docs:` / `refactor:` | No user-facing change | none |
+
+When commits land on `main`, release-please opens or updates a **Release PR** with a changelog and bumped version. Merging that PR creates a GitHub release, which triggers the publish workflow to push to npm with provenance automatically.

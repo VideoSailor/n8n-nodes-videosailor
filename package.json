@@ -1,5 +1,5 @@
 {
-	"name": "@videosailor/n8n-videosailor-node",
+	"name": "@videosailor/n8n-nodes-videosailor",
 	"version": "1.0.0",
 	"description": "n8n community node to download, transcribe, trim, cut, resize, and subtitle videos via VideoSailor",
 	"keywords": [
@@ -20,7 +20,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/VideoSailor/n8n-videosailor-node"
+		"url": "https://github.com/VideoSailor/n8n-nodes-videosailor"
 	},
 	"main": "dist/nodes/VideoSailor/VideoSailor.node.js",
 	"engines": {

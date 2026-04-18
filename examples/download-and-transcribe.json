@@ -1,0 +1,59 @@
+{
+  "name": "VideoSailor — Download & Transcribe Example",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-0001-0001-0001-000000000001",
+      "name": "When clicking 'Test workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "binaryPropertyName": "data"
+      },
+      "id": "a1b2c3d4-0002-0002-0002-000000000002",
+      "name": "VideoSailor — Download",
+      "type": "n8n-nodes-videosailor.videoSailor",
+      "typeVersion": 1,
+      "position": [460, 300],
+      "credentials": {
+        "videoSailorApi": {
+          "id": "1",
+          "name": "VideoSailor account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "transcribe",
+        "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      },
+      "id": "a1b2c3d4-0003-0003-0003-000000000003",
+      "name": "VideoSailor — Transcribe",
+      "type": "n8n-nodes-videosailor.videoSailor",
+      "typeVersion": 1,
+      "position": [680, 300],
+      "credentials": {
+        "videoSailorApi": {
+          "id": "1",
+          "name": "VideoSailor account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [[{ "node": "VideoSailor — Download", "type": "main", "index": 0 }]]
+    },
+    "VideoSailor — Download": {
+      "main": [[{ "node": "VideoSailor — Transcribe", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
