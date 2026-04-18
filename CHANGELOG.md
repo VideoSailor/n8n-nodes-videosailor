@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/VideoSailor/n8n-nodes-videosailor/compare/n8n-nodes-videosailor-v1.1.1...n8n-nodes-videosailor-v1.1.2) (2026-04-18)
+
+
+### Bug Fixes
+
+* retrigger publish ([cbcc326](https://github.com/VideoSailor/n8n-nodes-videosailor/commit/cbcc32647cecbd4ebd0344861421de2c12b2b1a3))
+
 ## [1.1.1](https://github.com/VideoSailor/n8n-nodes-videosailor/compare/n8n-nodes-videosailor-v1.1.0...n8n-nodes-videosailor-v1.1.1) (2026-04-18)
 
 
