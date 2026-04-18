@@ -24,7 +24,7 @@
 	},
 	"main": "dist/nodes/VideoSailor/VideoSailor.node.js",
 	"engines": {
-		"node": ">=20.15"
+		"node": ">=22.0.0"
 	},
 	"scripts": {
 		"build": "tsc && gulp build:icons",
