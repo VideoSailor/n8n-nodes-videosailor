@@ -63,7 +63,7 @@ This node requires API credentials for the VideoSailor API.
 3. ✨ Generate a new API key
 4. 📋 Copy the API key
 
-📖 Refer to the [API Usage Guide](https://videosailor.com/api-usage) for detailed instructions on obtaining and managing your API keys.
+📖 Refer to the [API Keys Guide](https://videosailor.com/api-usage?content=keys) for detailed instructions on obtaining and managing your API keys.
 
 ### 🛠️ Configuring Credentials in n8n
 
@@ -81,7 +81,8 @@ This node requires API credentials for the VideoSailor API.
 ## 🔗 Resources
 
 - 📘 [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
-- 📗 [VideoSailor API Documentation](https://videosailor.com/api-usage)
+- 📗 [VideoSailor API Documentation](https://videosailor.com/api-usage?content=documentation)
+- 🔑 [VideoSailor API Keys Guide](https://videosailor.com/api-usage?content=keys)
 
 ## 🧑‍💻 Development
 
