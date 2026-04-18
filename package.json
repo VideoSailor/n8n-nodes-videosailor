@@ -1,5 +1,5 @@
 {
-	"name": "n8n-nodes-videosailor",
+	"name": "@videosailor/n8n-videosailor-node",
 	"version": "1.0.0",
 	"description": "n8n community node to download, transcribe, trim, cut, resize, and subtitle videos via VideoSailor",
 	"keywords": [
