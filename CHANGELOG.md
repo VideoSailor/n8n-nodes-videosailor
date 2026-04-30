@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.3](https://github.com/VideoSailor/n8n-nodes-videosailor/compare/n8n-nodes-videosailor-v1.1.2...n8n-nodes-videosailor-v1.1.3) (2026-04-30)
+
+
+### Bug Fixes
+
+* **n8n-node:** wrap HTTP errors in NodeApiError for proper status/body context ([150efc1](https://github.com/VideoSailor/n8n-nodes-videosailor/commit/150efc1b0e3e34f100715b1bf7273b2966ece66a))
+
 ## [1.1.2](https://github.com/VideoSailor/n8n-nodes-videosailor/compare/n8n-nodes-videosailor-v1.1.1...n8n-nodes-videosailor-v1.1.2) (2026-04-18)
 
 
