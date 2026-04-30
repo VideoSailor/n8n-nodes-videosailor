@@ -5,8 +5,9 @@ import type {
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
+	JsonObject,
 } from 'n8n-workflow';
-import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
+import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
 export class VideoSailor implements INodeType {
 	description: INodeTypeDescription = {
@@ -453,15 +454,16 @@ export class VideoSailor implements INodeType {
 				);
 				returnData.push(...executionData);
 			} catch (error) {
+				const nodeError = new NodeApiError(this.getNode(), error as JsonObject);
 				if (this.continueOnFail()) {
 					const executionData = this.helpers.constructExecutionMetaData(
-						this.helpers.returnJsonArray({ error: (error as Error).message }),
+						this.helpers.returnJsonArray({ error: nodeError.message }),
 						{ itemData: { item: i } },
 					);
 					returnData.push(...executionData);
 					continue;
 				}
-				throw error;
+				throw nodeError;
 			}
 		}
 
