@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.4](https://github.com/VideoSailor/n8n-nodes-videosailor/compare/n8n-nodes-videosailor-v1.1.3...n8n-nodes-videosailor-v1.1.4) (2026-06-28)
+
+
+### Bug Fixes
+
+* long running transcribe timeous out after ~2 minutes ([ece1bd5](https://github.com/VideoSailor/n8n-nodes-videosailor/commit/ece1bd5d22b3d7ea0f64fe6d1181e2f69e9f507d))
+
 ## [1.1.3](https://github.com/VideoSailor/n8n-nodes-videosailor/compare/n8n-nodes-videosailor-v1.1.2...n8n-nodes-videosailor-v1.1.3) (2026-04-30)
 
 
