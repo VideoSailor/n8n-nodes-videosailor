@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.5](https://github.com/VideoSailor/n8n-nodes-videosailor/compare/n8n-nodes-videosailor-v1.1.4...n8n-nodes-videosailor-v1.1.5) (2026-06-28)
+
+
+### Bug Fixes
+
+* switch all nodes to async call ([8303ff2](https://github.com/VideoSailor/n8n-nodes-videosailor/commit/8303ff24645f6cb5f32d0cbc5ee97108bb480960))
+
 ## [1.1.4](https://github.com/VideoSailor/n8n-nodes-videosailor/compare/n8n-nodes-videosailor-v1.1.3...n8n-nodes-videosailor-v1.1.4) (2026-06-28)
 
 
