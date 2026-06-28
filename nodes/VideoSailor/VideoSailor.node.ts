@@ -350,11 +350,8 @@ export class VideoSailor implements INodeType {
 						const start = this.getNodeParameter('start', i) as number;
 						const end = this.getNodeParameter('end', i) as number;
 						validateTimeRange(this, i, start, end);
-						response = await this.helpers.httpRequestWithAuthentication.call(
-							this,
-							'videoSailorApi',
-							buildRequest(baseUrl, 'POST', '/api/trim', { url, start, end }),
-						);
+						const trimJobRes = await startAsyncJob(this, baseUrl, '/api/trim/async', { url, start, end }, i, 'Trim');
+						response = await pollJobStatus(this, baseUrl, trimJobRes, i, 'Trim');
 						break;
 					}
 
@@ -362,11 +359,8 @@ export class VideoSailor implements INodeType {
 						const start = this.getNodeParameter('start', i) as number;
 						const end = this.getNodeParameter('end', i) as number;
 						validateTimeRange(this, i, start, end);
-						response = await this.helpers.httpRequestWithAuthentication.call(
-							this,
-							'videoSailorApi',
-							buildRequest(baseUrl, 'POST', '/api/cut', { url, start, end }),
-						);
+						const cutJobRes = await startAsyncJob(this, baseUrl, '/api/cut/async', { url, start, end }, i, 'Cut');
+						response = await pollJobStatus(this, baseUrl, cutJobRes, i, 'Cut');
 						break;
 					}
 
@@ -382,68 +376,22 @@ export class VideoSailor implements INodeType {
 							body.resolution = this.getNodeParameter('resolution', i) as string;
 						}
 
-						response = await this.helpers.httpRequestWithAuthentication.call(
-							this,
-							'videoSailorApi',
-							buildRequest(baseUrl, 'POST', '/api/resize', body),
-						);
+						const resizeJobRes = await startAsyncJob(this, baseUrl, '/api/resize/async', body, i, 'Resize');
+						response = await pollJobStatus(this, baseUrl, resizeJobRes, i, 'Resize');
 						break;
 					}
 
 					case 'transcribe': {
-						const jobRes = (await this.helpers.httpRequestWithAuthentication.call(
+						const transcribeJobRes = await startAsyncJob(this, baseUrl, '/api/transcribe/async', { url }, i, 'Transcribe');
+						// Transcribe uses its own legacy status endpoint for backward compat.
+						response = await pollJobStatus(
 							this,
-							'videoSailorApi',
-							buildRequest(baseUrl, 'POST', '/api/transcribe/async', { url }),
-						)) as { job_id: string };
-
-						if (!jobRes.job_id) {
-							throw new NodeOperationError(
-								this.getNode(),
-								'Transcribe job failed to start: no job_id returned',
-								{ itemIndex: i },
-							);
-						}
-
-						const deadline = Date.now() + 15 * 60 * 1000; // 15 minutes max
-						let delay = 5_000;   // start at 5 s
-						const maxDelay = 30_000; // cap at 30 s
-						let transcribeResult: IDataObject | undefined;
-
-						while (Date.now() < deadline) {
-							await new Promise((resolve) => setTimeout(resolve, delay));
-							delay = Math.min(delay * 2, maxDelay);
-
-							const statusRes = (await this.helpers.httpRequestWithAuthentication.call(
-								this,
-								'videoSailorApi',
-								buildRequest(baseUrl, 'GET', `/api/transcribe/${jobRes.job_id}/status`),
-							)) as { status: string; result?: IDataObject; error?: string };
-
-							if (statusRes.status === 'complete') {
-								transcribeResult = statusRes.result as IDataObject;
-								break;
-							}
-
-							if (statusRes.status === 'error') {
-								throw new NodeOperationError(
-									this.getNode(),
-									`Transcription failed: ${statusRes.error ?? 'unknown error'}`,
-									{ itemIndex: i },
-								);
-							}
-							// status === 'pending' → keep polling
-						}
-
-						if (!transcribeResult) {
-							throw new NodeOperationError(
-								this.getNode(),
-								'Transcription timed out after 15 minutes',
-								{ itemIndex: i },
-							);
-						}
-
-						response = transcribeResult;
+							baseUrl,
+							transcribeJobRes,
+							i,
+							'Transcribe',
+							`/api/transcribe/${transcribeJobRes}/status`,
+						);
 						break;
 					}
 
@@ -473,11 +421,8 @@ export class VideoSailor implements INodeType {
 							words,
 						};
 
-						response = await this.helpers.httpRequestWithAuthentication.call(
-							this,
-							'videoSailorApi',
-							buildRequest(baseUrl, 'POST', '/api/subtitles', { url, subtitles }),
-						);
+						const subtitlesJobRes = await startAsyncJob(this, baseUrl, '/api/subtitles/async', { url, subtitles }, i, 'Subtitles');
+						response = await pollJobStatus(this, baseUrl, subtitlesJobRes, i, 'Subtitles');
 						break;
 					}
 
@@ -543,4 +488,74 @@ function validateTimeRange(ctx: IExecuteFunctions, index: number, start: number,
 			itemIndex: index,
 		});
 	}
+}
+
+// Submits an async job and returns the job_id, throwing on failure.
+async function startAsyncJob(
+	self: IExecuteFunctions,
+	baseUrl: string,
+	path: string,
+	body: IDataObject,
+	itemIndex: number,
+	operationName: string,
+): Promise<string> {
+	const jobRes = (await self.helpers.httpRequestWithAuthentication.call(
+		self,
+		'videoSailorApi',
+		buildRequest(baseUrl, 'POST', path, body),
+	)) as { job_id: string };
+
+	if (!jobRes.job_id) {
+		throw new NodeOperationError(
+			self.getNode(),
+			`${operationName} job failed to start: no job_id returned`,
+			{ itemIndex },
+		);
+	}
+	return jobRes.job_id;
+}
+
+// Polls the job status endpoint until complete or timeout, returning the result.
+// statusPath defaults to /api/jobs/:jobId/status; pass explicitly for legacy endpoints.
+async function pollJobStatus(
+	self: IExecuteFunctions,
+	baseUrl: string,
+	jobId: string,
+	itemIndex: number,
+	operationName: string,
+	statusPath?: string,
+): Promise<IDataObject> {
+	const path = statusPath ?? `/api/jobs/${jobId}/status`;
+	const deadline = Date.now() + 15 * 60 * 1000;
+	let delay = 5_000;
+	const maxDelay = 30_000;
+
+	while (Date.now() < deadline) {
+		await new Promise((resolve) => setTimeout(resolve, delay));
+		delay = Math.min(delay * 2, maxDelay);
+
+		const statusRes = (await self.helpers.httpRequestWithAuthentication.call(
+			self,
+			'videoSailorApi',
+			buildRequest(baseUrl, 'GET', path),
+		)) as { status: string; result?: IDataObject; error?: string };
+
+		if (statusRes.status === 'complete') {
+			return statusRes.result as IDataObject;
+		}
+		if (statusRes.status === 'error') {
+			throw new NodeOperationError(
+				self.getNode(),
+				`${operationName} failed: ${statusRes.error ?? 'unknown error'}`,
+				{ itemIndex },
+			);
+		}
+		// status === 'pending' → keep polling
+	}
+
+	throw new NodeOperationError(
+		self.getNode(),
+		`${operationName} timed out after 15 minutes`,
+		{ itemIndex },
+	);
 }
