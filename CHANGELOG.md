@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.6](https://github.com/VideoSailor/n8n-nodes-videosailor/compare/n8n-nodes-videosailor-v1.1.5...n8n-nodes-videosailor-v1.1.6) (2026-06-29)
+
+
+### Tech Debt/Chore work
+
+* use sleep instead of setTimeout ([bbab943](https://github.com/VideoSailor/n8n-nodes-videosailor/commit/bbab9433d9b5103b16a70a7750e89e1ca5b7930e))
+
 ## [1.1.5](https://github.com/VideoSailor/n8n-nodes-videosailor/compare/n8n-nodes-videosailor-v1.1.4...n8n-nodes-videosailor-v1.1.5) (2026-06-28)
 
 
