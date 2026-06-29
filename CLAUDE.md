@@ -95,3 +95,9 @@ release-please accumulates commits into a Release PR. Merging the Release PR bum
 ### Non-negotiables
 - Never rename the internal node name (`videoSailor`) or package name (`n8n-nodes-videosailor`) without updating `type` references in every workflow JSON that consumes it.
 - Never split the Download operation (see Constraints).
+- **Never use `setTimeout` directly** — n8n community nodes are not permitted to use the global `setTimeout`. Always use `sleep` from `n8n-workflow` instead:
+  ```ts
+  import { sleep } from 'n8n-workflow';
+  await sleep(delayMs);
+  ```
+  Using `setTimeout` will fail the n8n Cloud package scan and block approval.

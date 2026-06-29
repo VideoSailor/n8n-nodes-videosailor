@@ -7,7 +7,7 @@ import type {
 	INodeTypeDescription,
 	JsonObject,
 } from 'n8n-workflow';
-import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
+import { NodeApiError, NodeConnectionTypes, NodeOperationError, sleep } from 'n8n-workflow';
 
 export class VideoSailor implements INodeType {
 	description: INodeTypeDescription = {
@@ -531,7 +531,7 @@ async function pollJobStatus(
 	const maxDelay = 30_000;
 
 	while (Date.now() < deadline) {
-		await new Promise((resolve) => setTimeout(resolve, delay));
+		await sleep(delay);
 		delay = Math.min(delay * 2, maxDelay);
 
 		const statusRes = (await self.helpers.httpRequestWithAuthentication.call(
