@@ -448,9 +448,17 @@ export class VideoSailor implements INodeType {
 				returnData.push(...executionData);
 			} catch (error) {
 				const nodeError = new NodeApiError(this.getNode(), error as JsonObject);
+				const { code, retryable } = extractApiFailureInfo(error);
+				if (retryable === false) {
+					nodeError.context.retryable = false;
+					nodeError.context.code = code;
+					nodeError.description = [nodeError.description, `Not retryable (${code}) — retrying this item will not succeed.`]
+						.filter(Boolean)
+						.join(' ');
+				}
 				if (this.continueOnFail()) {
 					const executionData = this.helpers.constructExecutionMetaData(
-						this.helpers.returnJsonArray({ error: nodeError.message }),
+						this.helpers.returnJsonArray({ error: nodeError.message, code, retryable }),
 						{ itemData: { item: i } },
 					);
 					returnData.push(...executionData);
@@ -462,6 +470,18 @@ export class VideoSailor implements INodeType {
 
 		return [returnData];
 	}
+}
+
+function extractApiFailureInfo(error: unknown): { code?: string; retryable?: boolean } {
+	const data = (error as { response?: { data?: unknown } })?.response?.data;
+	if (!data || typeof data !== 'object') {
+		return {};
+	}
+	const { code, retryable } = data as IDataObject;
+	return {
+		code: typeof code === 'string' ? code : undefined,
+		retryable: typeof retryable === 'boolean' ? retryable : undefined,
+	};
 }
 
 function buildRequest(
