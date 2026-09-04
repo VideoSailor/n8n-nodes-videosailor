@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/VideoSailor/n8n-nodes-videosailor/compare/n8n-nodes-videosailor-v1.1.6...n8n-nodes-videosailor-v1.2.0) (2026-09-04)
+
+
+### Features
+
+* **node:** surface code/retryable on failed operations ([ee08bb5](https://github.com/VideoSailor/n8n-nodes-videosailor/commit/ee08bb5465497beffbfaee1dc1d5820dd2ad74e6))
+
+
+### Bug Fixes
+
+* **node:** stop duplicating error text and re-wrapping node errors ([5b32e18](https://github.com/VideoSailor/n8n-nodes-videosailor/commit/5b32e184bc8f29b68ec8d21c6dce9b05c53e93ca))
+
 ## [1.1.6](https://github.com/VideoSailor/n8n-nodes-videosailor/compare/n8n-nodes-videosailor-v1.1.5...n8n-nodes-videosailor-v1.1.6) (2026-06-29)
 
 
