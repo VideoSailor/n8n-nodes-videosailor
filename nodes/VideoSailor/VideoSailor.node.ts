@@ -447,14 +447,22 @@ export class VideoSailor implements INodeType {
 				);
 				returnData.push(...executionData);
 			} catch (error) {
-				const nodeError = new NodeApiError(this.getNode(), error as JsonObject);
 				const { code, retryable } = extractApiFailureInfo(error);
-				if (retryable === false) {
-					nodeError.context.retryable = false;
-					nodeError.context.code = code;
-					nodeError.description = [nodeError.description, `Not retryable (${code}) — retrying this item will not succeed.`]
-						.filter(Boolean)
-						.join(' ');
+				// Errors this node raised itself are already classified and described.
+				// Wrapping one in NodeApiError would tag it as reWrapped and, because
+				// NodeApiError copies the cause's description, repeat the retryable note.
+				let nodeError: NodeApiError | NodeOperationError;
+				if (error instanceof NodeOperationError) {
+					nodeError = error;
+				} else {
+					nodeError = new NodeApiError(this.getNode(), error as JsonObject);
+					if (retryable === false) {
+						nodeError.context.retryable = false;
+						nodeError.context.code = code;
+						nodeError.description = [nodeError.description, `Not retryable (${code}) — retrying this item will not succeed.`]
+							.filter(Boolean)
+							.join(' ');
+					}
 				}
 				if (this.continueOnFail()) {
 					const executionData = this.helpers.constructExecutionMetaData(
@@ -472,16 +480,27 @@ export class VideoSailor implements INodeType {
 	}
 }
 
+// Failure classification reaches this node two different ways. A synchronous
+// route reports it in the HTTP error body; an async job reports it inside a 200
+// job-status response, so pollJobStatus copies it onto the error's context.
 function extractApiFailureInfo(error: unknown): { code?: string; retryable?: boolean } {
-	const data = (error as { response?: { data?: unknown } })?.response?.data;
-	if (!data || typeof data !== 'object') {
-		return {};
+	const candidates = [
+		(error as { response?: { data?: unknown } })?.response?.data,
+		(error as { context?: unknown })?.context,
+	];
+	for (const candidate of candidates) {
+		if (!candidate || typeof candidate !== 'object') {
+			continue;
+		}
+		const { code, retryable } = candidate as IDataObject;
+		if (typeof code === 'string' || typeof retryable === 'boolean') {
+			return {
+				code: typeof code === 'string' ? code : undefined,
+				retryable: typeof retryable === 'boolean' ? retryable : undefined,
+			};
+		}
 	}
-	const { code, retryable } = data as IDataObject;
-	return {
-		code: typeof code === 'string' ? code : undefined,
-		retryable: typeof retryable === 'boolean' ? retryable : undefined,
-	};
+	return {};
 }
 
 function buildRequest(
@@ -558,17 +577,36 @@ async function pollJobStatus(
 			self,
 			'videoSailorApi',
 			buildRequest(baseUrl, 'GET', path),
-		)) as { status: string; result?: IDataObject; error?: string };
+		)) as {
+			status: string;
+			result?: IDataObject;
+			error?: string;
+			code?: string;
+			retryable?: boolean;
+		};
 
 		if (statusRes.status === 'complete') {
 			return statusRes.result as IDataObject;
 		}
 		if (statusRes.status === 'error') {
-			throw new NodeOperationError(
+			const notRetryable = statusRes.retryable === false;
+			const jobError = new NodeOperationError(
 				self.getNode(),
 				`${operationName} failed: ${statusRes.error ?? 'unknown error'}`,
-				{ itemIndex },
+				{
+					itemIndex,
+					description: notRetryable
+						? `Not retryable (${statusRes.code ?? 'unknown'}) — retrying this item will not succeed.`
+						: undefined,
+				},
 			);
+			if (typeof statusRes.code === 'string') {
+				jobError.context.code = statusRes.code;
+			}
+			if (typeof statusRes.retryable === 'boolean') {
+				jobError.context.retryable = statusRes.retryable;
+			}
+			throw jobError;
 		}
 		// status === 'pending' → keep polling
 	}
