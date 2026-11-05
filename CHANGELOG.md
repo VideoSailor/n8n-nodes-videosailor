@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/VideoSailor/n8n-nodes-videosailor/compare/n8n-nodes-videosailor-v1.2.0...n8n-nodes-videosailor-v1.2.1) (2026-11-05)
+
+
+### Bug Fixes
+
+* **node:** validate http(s) URL input and point credential test at /api/key/verify ([ce3c7eb](https://github.com/VideoSailor/n8n-nodes-videosailor/commit/ce3c7ebcec322a363a3f439033944f0877efa5ab))
+
 ## [1.2.0](https://github.com/VideoSailor/n8n-nodes-videosailor/compare/n8n-nodes-videosailor-v1.1.6...n8n-nodes-videosailor-v1.2.0) (2026-09-04)
 
 
