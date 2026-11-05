@@ -9,6 +9,15 @@ import type {
 } from 'n8n-workflow';
 import { NodeApiError, NodeConnectionTypes, NodeOperationError, sleep } from 'n8n-workflow';
 
+function isHttpUrl(value: string): boolean {
+	try {
+		const { protocol } = new URL(value);
+		return protocol === 'http:' || protocol === 'https:';
+	} catch {
+		return false;
+	}
+}
+
 export class VideoSailor implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'VideoSailor',
@@ -98,7 +107,7 @@ export class VideoSailor implements INodeType {
 				default: '',
 				placeholder: 'https://youtube.com/watch?v=... or https://example.com/video.mp4',
 				description:
-					'URL of the media. Supports YouTube, TikTok, Instagram, Twitter/X, Vimeo, and 1 000+ sites.',
+					'Public http(s) URL of the media, not a binary property name. Supports YouTube, TikTok, Instagram, Twitter/X, Vimeo, and 1 000+ sites.',
 			},
 
 			{
@@ -275,10 +284,18 @@ export class VideoSailor implements INodeType {
 		for (let i = 0; i < items.length; i++) {
 			try {
 				const operation = this.getNodeParameter('operation', i) as string;
-				const url = this.getNodeParameter('url', i) as string;
+				const url = (this.getNodeParameter('url', i) as string).trim();
 
 				if (!url) {
 					throw new NodeOperationError(this.getNode(), 'URL is required', { itemIndex: i });
+				}
+
+				if (!isHttpUrl(url)) {
+					throw new NodeOperationError(this.getNode(), `Invalid URL: "${url}"`, {
+						itemIndex: i,
+						description:
+							'Enter a public http(s) link to the media. Binary properties such as "data" are not supported as input.',
+					});
 				}
 
 				let response: IDataObject;
